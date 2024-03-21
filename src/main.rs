@@ -1,25 +1,15 @@
 use sqlx::{migrate::MigrateDatabase,Sqlite, SqlitePool};
-use sqlx::sqlite::SqliteQueryResult;
- const DB_URL:&str = "sqlite://sqlite.db";
+use actix_web::{web, App, HttpServer, Responder, HttpRequest};
+const DB_URL:&str = "sqlite://sqlite.db";
 
 
-// async fn create_schema(db_url: &str) -> Result<SqliteQueryResult, sqlx::Error> {
-//     let pool = SqlitePool::connect(&db_url).await?;
-//     let qry =
-//         "
-//     ";
-//
-//
-//     let result = sqlx::query(&qry)
-//         .execute(&pool).await;
-//     println!("----------");
-//     pool.close().await;
-//     return result
-// }
+async fn greet(req: HttpRequest)->impl Responder{
+    let name = req.match_info().get("name").unwrap_or("World");
+    format!("Hello {}!", &name)
+}
 
-
-#[tokio::main]
-async fn main() {
+#[actix_web::main]
+async fn main() ->std::io::Result<()> {
     //let db_url = String::from("sqlite://sqlite.db");
     // db migration
     if !Sqlite::database_exists(&DB_URL).await.unwrap_or(false) {
@@ -51,15 +41,6 @@ async fn main() {
 
     println!("migration: {:?}", migration_results);
 
-    // if !Sqlite::database_exists(&DB_URL).await.unwrap_or(false) {
-    //     Sqlite::create_database(&DB_URL).await.unwrap();
-    //     match  create_schema(&DB_URL).await  {
-    //         Ok(_) => println!("Schema created"),
-    //         Err(e) => println!("Error creating schema: {:?}", e)
-    //     }
-    // }
-
-
 
 
     let instance = SqlitePool::connect(&DB_URL).await.unwrap();
@@ -70,4 +51,9 @@ async fn main() {
 
     instance.close().await;
     println!("{:?}", result);
+    HttpServer::new(|| {
+        App::new()
+            .route("/", web::get().to(greet))
+            .route("/{name}", web::get().to(greet))
+    }).bind("127.0.0.1:8080")?.run().await
 }
