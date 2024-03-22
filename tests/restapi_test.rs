@@ -1,14 +1,16 @@
-use actix_web::{client::Client};
+use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 #[tokio::test]
-async fn get_pets(){
-    let json = Client::default()
-        .get(format!("https://petstore.swagger.io/v2/pet/findByStatus?status={}", "available"))
-        .send()
+async fn get_pets()-> Result<(), Box<dyn std::error::Error>>{
+    let resp =  reqwest::
+        get("https://httpbin.org/ip")
+        // get(format!("https://petstore.swagger.io/v2/pet/findByStatus?status={}", "available"))
         .await?
-        .json::<NewsJson>()
+        .json::<HashMap<String, String>>()
         .await?;
-    Ok(json);
+
+    println!("{resp:#?}");
+    Ok(())
 }
 
 #[derive(Serialize, Deserialize, Debug)]
