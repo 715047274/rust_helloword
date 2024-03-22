@@ -18,7 +18,10 @@ default = []
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+actix-web = "4.5.1"
 dotenv = "0.15.0"
+serde = "1.0.197"
+serde_json = "1.0.114"
 sqlx = { version="0.7.3", features=["runtime-tokio-native-tls","sqlite"] }
 tokio = { verion="1.36.0", features = ["full"] }
 
